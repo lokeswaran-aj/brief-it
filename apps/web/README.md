@@ -13,7 +13,7 @@ pnpm dev
 
 Open http://localhost:3000. Changes to `app/page.tsx` reload automatically.
 
-The initial scaffold needs no environment variables, database, or Google credentials. Google sign-in and briefing creation are the next implementation tasks.
+Follow the root README to start PostgreSQL and copy `.env.example` to `.env` in this directory. `DATABASE_URL` points to the local database; the application will use it when the ORM is added. Google credentials are not needed yet. Google sign-in and briefing creation are the next implementation tasks.
 
 ## Checks
 
