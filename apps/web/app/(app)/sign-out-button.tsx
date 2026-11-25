@@ -34,18 +34,18 @@ export function SignOutButton() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <button
         type="button"
         onClick={handleSignOut}
         disabled={isPending}
-        className="cursor-pointer rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full cursor-pointer rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Signing out..." : "Sign out"}
       </button>
 
       {errorMessage ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-xs text-red-600">
           {errorMessage}
         </p>
       ) : null}
