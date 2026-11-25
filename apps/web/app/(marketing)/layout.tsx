@@ -1,4 +1,6 @@
+import { AudioLines } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { getServerSession } from "@/lib/auth-session";
 
 export default async function MarketingLayout({
@@ -9,31 +11,28 @@ export default async function MarketingLayout({
   const session = await getServerSession();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="border-b bg-background/95 backdrop-blur-xs">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <Link
             href="/"
-            className="text-base font-semibold tracking-tight text-zinc-950"
+            className="inline-flex items-center gap-2 text-base font-semibold tracking-tight text-foreground"
           >
+            <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <AudioLines className="size-4" aria-hidden="true" />
+            </span>
             Brief-it
           </Link>
 
           <nav className="flex items-center gap-3">
             {session ? (
-              <Link
-                href="/dashboard"
-                className="rounded-lg bg-zinc-950 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
-              >
+              <Button render={<Link href="/dashboard" />} nativeButton={false}>
                 Dashboard
-              </Link>
+              </Button>
             ) : (
-              <Link
-                href="/sign-in"
-                className="rounded-lg bg-zinc-950 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
-              >
+              <Button render={<Link href="/sign-in" />} nativeButton={false}>
                 Sign in
-              </Link>
+              </Button>
             )}
           </nav>
         </div>
@@ -43,8 +42,8 @@ export default async function MarketingLayout({
         {children}
       </main>
 
-      <footer className="border-t border-zinc-200 bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-4 text-xs text-zinc-500">
+      <footer className="border-t bg-background">
+        <div className="mx-auto max-w-5xl px-6 py-4 text-xs text-muted-foreground">
           Brief-it · Personalized audio briefings
         </div>
       </footer>
