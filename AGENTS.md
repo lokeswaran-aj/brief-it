@@ -8,7 +8,7 @@ These are planning decisions, not implemented capabilities. Latest user instruct
 
 ## Current Setup and Scope
 
-Start with the standalone Next.js app in `apps/web`; use `app/` directly, without `src/`, a root JavaScript package, or pnpm workspaces. Install and run commands from `apps/web`. Use Node.js 24 LTS and the package's pinned pnpm version. Run `pnpm lint`, `pnpm typecheck`, and `pnpm build` for web verification. Auth and briefing creation are the next two tasks. Add workers and infrastructure only when their implementation begins.
+Start with the standalone Next.js app in `apps/web`; use `app/` directly, without `src/`, a root JavaScript package, or pnpm workspaces (a standalone `apps/web/pnpm-workspace.yaml` with `allowBuilds` only is fine for pnpm 11). Install and run commands from `apps/web`. Use Node.js 24 LTS and the package's pinned pnpm version. Run `pnpm lint`, `pnpm typecheck`, and `pnpm build` for web verification. Google auth with Better Auth and Drizzle ORM is implemented; briefing creation is the next task. Add workers and infrastructure only when their implementation begins.
 
 ## Agreed MVP
 
@@ -33,7 +33,7 @@ Start with the standalone Next.js app in `apps/web`; use `app/` directly, withou
 Use one repository with separate web, worker, and scheduler processes:
 
 - **Next.js + TypeScript:** website and complete user-facing backend, including briefing/schedule management, generation requests, history, and playback authorization.
-- **Better Auth:** Google sign-in with PostgreSQL-backed records. Next.js owns sessions and access checks.
+- **Better Auth + Drizzle ORM:** Google sign-in backed by PostgreSQL (`pg`) using **plural table names** (`users`, `sessions`, `accounts`, `verifications`) and **`uuid` primary/foreign keys** (`pg_catalog.gen_random_uuid()`). Encrypt OAuth tokens at rest (`encryptOAuthTokens: true`). Keep Next.js 16 `proxy.ts` as an optimistic redirect only and always validate sessions against PostgreSQL via `auth.api.getSession()` (`requireSession()`). Generate auth schema and SQL migrations via CLIs (`pnpm auth:schema`, `pnpm db:generate`, `pnpm db:migrate`).
 - **Python + Celery:** research, scripting, TTS, generation orchestration, and task publication. Redis is the broker; Celery workers execute tasks.
 - **Celery Beat:** periodically triggers a Python dispatcher. User schedules remain in Postgres. A scheduler determines when work is due; the broker holds messages; workers execute work.
 - **No internal FastAPI bridge:** Python agents do not require FastAPI. Next.js does not publish Celery messages or need a TypeScript Celery SDK.
@@ -70,6 +70,11 @@ The user has GCP credits and prioritizes low operational burden and portability 
 
 ## Deferred Decisions and Working Guidance
 
-Research tools, budgets, evidence validation, detailed lifecycle, exact Gemini/TTS models, regions, worker scaling, ORM/migration tooling, email provider, and missed-schedule behavior remain open. Drizzle was suggested, not finalized. Preserve citations, distinguish publication/event dates, avoid repeated stories, and retain structured evidence beyond any concise report.
+Research tools, budgets, evidence validation, detailed lifecycle, exact Gemini/TTS models, regions, worker scaling, email provider, and missed-schedule behavior remain open. Drizzle ORM and Drizzle Kit are finalized for Postgres schema and migrations. Preserve citations, distinguish publication/event dates, avoid repeated stories, and retain structured evidence beyond any concise report.
 
-Implement incrementally, preserve unrelated edits, verify changed behavior, and explain GCP plainly. Resolve deferred choices when needed.
+Working guidance:
+
+- Implement incrementally, preserve unrelated edits, verify changed behavior, and explain GCP plainly. Resolve deferred choices when needed.
+- **Commit small:** Make small, focused, single-purpose Conventional Commits (e.g., separating dependencies, schema/migrations, backend/auth wiring, UI routes, and docs) instead of bundling a full feature into one commit. Avoid staging auto-generated `apps/web/AGENTS.md` from `next dev` unless explicitly requested.
+- **Browser verification:** After web UI or auth changes, verify affected flows in the T3 Preview browser (`default` profile, which has local Google sign-in configured) in addition to running `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
+- **HTML visual artifacts:** Always include self-contained CSS variable fallbacks (e.g., `var(--card, #ffffff)`) and standalone layout defaults so HTML diagrams render cleanly when opened directly in a browser as well as inside embedded previews.
