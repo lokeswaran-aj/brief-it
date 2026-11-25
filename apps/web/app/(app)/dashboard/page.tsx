@@ -1,25 +1,17 @@
-import Link from "next/link";
 import { requireSession } from "@/lib/auth-session";
-import { SignOutButton } from "./sign-out-button";
 
 export default async function DashboardPage() {
   const { user, session } = await requireSession();
 
   return (
-    <main className="mx-auto max-w-2xl space-y-8 px-6 py-14">
-      <header className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-6">
-        <div>
-          <Link
-            href="/"
-            className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
-          >
-            Brief-it
-          </Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-950">
-            Dashboard
-          </h1>
-        </div>
-        <SignOutButton />
+    <div className="space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-950">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-zinc-600">
+          Your briefings and recent episodes will appear here.
+        </p>
       </header>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs">
@@ -49,6 +41,6 @@ export default async function DashboardPage() {
           </div>
         </dl>
       </section>
-    </main>
+    </div>
   );
 }
