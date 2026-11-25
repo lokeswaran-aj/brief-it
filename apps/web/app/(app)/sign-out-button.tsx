@@ -1,7 +1,9 @@
 "use client";
 
+import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
 export function SignOutButton() {
@@ -34,18 +36,29 @@ export function SignOutButton() {
   }
 
   return (
-    <div className="space-y-1">
-      <button
+    <div className="space-y-1.5">
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={handleSignOut}
         disabled={isPending}
-        className="w-full cursor-pointer rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full"
       >
+        {isPending ? (
+          <Loader2
+            data-icon="inline-start"
+            className="animate-spin"
+            aria-hidden="true"
+          />
+        ) : (
+          <LogOut data-icon="inline-start" aria-hidden="true" />
+        )}
         {isPending ? "Signing out..." : "Sign out"}
-      </button>
+      </Button>
 
       {errorMessage ? (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-xs text-destructive">
           {errorMessage}
         </p>
       ) : null}

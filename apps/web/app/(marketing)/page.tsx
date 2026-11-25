@@ -1,4 +1,7 @@
+import { ArrowRight, AudioLines } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getServerSession } from "@/lib/auth-session";
 
 export default async function HomePage() {
@@ -7,10 +10,14 @@ export default async function HomePage() {
   return (
     <section className="max-w-2xl space-y-6">
       <div className="space-y-3">
-        <h1 className="text-4xl font-semibold tracking-tight text-zinc-950">
+        <Badge variant="secondary">
+          <AudioLines data-icon="inline-start" aria-hidden="true" />
+          Personalized audio briefings
+        </Badge>
+        <h1 className="text-4xl font-semibold tracking-tight text-foreground">
           Brief-it
         </h1>
-        <p className="text-lg text-zinc-600">
+        <p className="text-lg text-muted-foreground">
           Personalized audio briefings from topics you follow, delivered on your
           schedule.
         </p>
@@ -19,23 +26,27 @@ export default async function HomePage() {
       <div className="flex flex-wrap items-center gap-3">
         {session ? (
           <>
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+            <Button
+              size="lg"
+              render={<Link href="/dashboard" />}
+              nativeButton={false}
             >
               Open dashboard
-            </Link>
-            <span className="text-sm text-zinc-600">
+              <ArrowRight data-icon="inline-end" aria-hidden="true" />
+            </Button>
+            <span className="text-sm text-muted-foreground">
               Signed in as {session.user.email}
             </span>
           </>
         ) : (
-          <Link
-            href="/sign-in"
-            className="rounded-lg bg-zinc-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+          <Button
+            size="lg"
+            render={<Link href="/sign-in" />}
+            nativeButton={false}
           >
             Sign in with Google
-          </Link>
+            <ArrowRight data-icon="inline-end" aria-hidden="true" />
+          </Button>
         )}
       </div>
     </section>
