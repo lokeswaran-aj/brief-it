@@ -1,56 +1,115 @@
-import { AlertCircle, AudioLines } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ColophonMark } from "@/components/brand/colophon-mark";
 import { getServerSession } from "@/lib/auth-session";
+import { EpisodeShowcase } from "./episode-showcase";
 import { GoogleSignInButton } from "./sign-in-button";
+
+export const metadata: Metadata = {
+  title: "Sign in · Brief-it",
+  description: "Sign in to Brief-it with Google to listen to your briefings.",
+};
+
+const CALLBACK_FALLBACK = "/dashboard";
+const CALLBACK_BASE_URL = new URL("https://brief-it.local");
+
+function getSafeCallbackUrl(raw: string | string[] | undefined): string {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return CALLBACK_FALLBACK;
+  }
+
+  try {
+    const resolved = new URL(value, CALLBACK_BASE_URL);
+    if (
+      resolved.origin !== CALLBACK_BASE_URL.origin ||
+      !resolved.pathname.startsWith("/") ||
+      resolved.pathname.startsWith("//")
+    ) {
+      return CALLBACK_FALLBACK;
+    }
+
+    return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return CALLBACK_FALLBACK;
+  }
+}
+
+function getSignInErrorMessage(
+  rawError: string | undefined,
+  isEpisodeReturn: boolean,
+): string | null {
+  if (!rawError) {
+    return null;
+  }
+
+  const normalized = rawError.toLowerCase();
+  const target = isEpisodeReturn ? "open your episode" : "continue";
+
+  if (normalized === "access_denied" || normalized.includes("cancel")) {
+    return `Google authentication was cancelled. Try again to ${target}.`;
+  }
+
+  return `Google authentication could not be completed. Try again to ${target}.`;
+}
 
 export default async function SignInPage({
   searchParams,
 }: PageProps<"/sign-in">) {
+  const params = await searchParams;
+  const callbackUrl = getSafeCallbackUrl(params.callbackUrl ?? params.next);
+
   const session = await getServerSession();
   if (session) {
-    redirect("/dashboard");
+    redirect(callbackUrl);
   }
 
-  const params = await searchParams;
   const rawError = Array.isArray(params.error) ? params.error[0] : params.error;
+  const isEpisodeReturn = callbackUrl.startsWith("/episodes/");
+  const initialErrorMessage = getSignInErrorMessage(rawError, isEpisodeReturn);
 
   return (
-    <main>
-      <Card className="p-2 sm:p-4">
-        <CardHeader className="space-y-2">
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <AudioLines className="size-4" aria-hidden="true" />
-          </div>
-          <CardTitle className="text-2xl font-semibold tracking-tight">
-            Sign in to your account
-          </CardTitle>
-          <CardDescription>
-            Use your Google account to manage briefings and listen to episodes.
-          </CardDescription>
-        </CardHeader>
+    <div className="relative min-h-screen lg:grid lg:grid-cols-[minmax(420px,43.055%)_1fr]">
+      <nav
+        aria-label="Back navigation"
+        className="absolute left-6 top-6 z-10 sm:left-10 sm:top-8 lg:left-12 lg:top-10"
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 rounded-md py-1 text-[13.5px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:focus-visible:ring-offset-secondary"
+        >
+          <ChevronLeft className="size-4" strokeWidth={1.75} aria-hidden="true" />
+          <span>Back to Brief-it</span>
+        </Link>
+      </nav>
 
-        <CardContent className="space-y-4">
-          {rawError ? (
-            <Alert variant="destructive">
-              <AlertCircle aria-hidden="true" />
-              <AlertTitle>Sign-in did not complete</AlertTitle>
-              <AlertDescription>
-                Authentication returned an error ({rawError}). Please try again.
-              </AlertDescription>
-            </Alert>
-          ) : null}
+      <aside
+        aria-label="Brief-it preview"
+        className="hidden items-center justify-center border-r border-border bg-secondary px-10 py-24 lg:flex xl:px-14"
+      >
+        <EpisodeShowcase />
+      </aside>
 
-          <GoogleSignInButton />
-        </CardContent>
-      </Card>
-    </main>
+      <main className="flex min-h-screen items-center justify-center bg-background px-6 pb-16 pt-24 sm:px-10 lg:py-16">
+        <div className="w-full max-w-[380px]">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-3 rounded-md py-0.5 text-foreground transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <ColophonMark className="size-8" />
+            <span className="font-serif text-[24px] leading-none tracking-[-0.01em] text-foreground">
+              Brief-it
+            </span>
+          </Link>
+
+          <GoogleSignInButton
+            callbackUrl={callbackUrl}
+            initialErrorMessage={initialErrorMessage}
+          />
+        </div>
+      </main>
+    </div>
   );
 }
