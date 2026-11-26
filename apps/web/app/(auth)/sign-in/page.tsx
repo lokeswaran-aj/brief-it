@@ -12,12 +12,29 @@ export const metadata: Metadata = {
   description: "Sign in to Brief-it with Google to listen to your briefings.",
 };
 
+const CALLBACK_FALLBACK = "/dashboard";
+const CALLBACK_BASE_URL = new URL("https://brief-it.local");
+
 function getSafeCallbackUrl(raw: string | string[] | undefined): string {
   const value = Array.isArray(raw) ? raw[0] : raw;
   if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/dashboard";
+    return CALLBACK_FALLBACK;
   }
-  return value;
+
+  try {
+    const resolved = new URL(value, CALLBACK_BASE_URL);
+    if (
+      resolved.origin !== CALLBACK_BASE_URL.origin ||
+      !resolved.pathname.startsWith("/") ||
+      resolved.pathname.startsWith("//")
+    ) {
+      return CALLBACK_FALLBACK;
+    }
+
+    return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return CALLBACK_FALLBACK;
+  }
 }
 
 function getSignInErrorMessage(
